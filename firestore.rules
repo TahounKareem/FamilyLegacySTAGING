@@ -1,0 +1,202 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+  
+    // ==========================================
+    // Authentication & Authorization Helpers
+    // ==========================================
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isStaff() {
+      return isSignedIn() && (
+        (request.auth.token != null && request.auth.token.email != null && request.auth.token.email.lower() == 'kareem.tahoun@adamresearchcenter.net') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'maestro', 'research', 'marketing', 'accounting', 'compliance', 'shipping', 'customer_service', 'editor'])
+      );
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token != null && request.auth.token.email != null && request.auth.token.email.lower() == 'kareem.tahoun@adamresearchcenter.net') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'maestro'])
+      );
+    }
+
+    // ==========================================
+    // Query Restrictions (Mass Reads Protection)
+    // ==========================================
+    function isValidQuery() {
+      // Prevent fetching more than 100 docs at once for normal users
+      return !('limit' in request.query) || request.query.limit <= 100;
+    }
+
+    // ==========================================
+    // Users Collection
+    // ==========================================
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isStaff());
+      allow write: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+    }
+    
+    // ==========================================
+    // Orders Collection
+    // ==========================================
+    match /orders/{orderId} {
+      allow read: if (isSignedIn() && resource.data.userId == request.auth.uid && isValidQuery()) || (isStaff());
+      allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isStaff());
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isStaff());
+      allow delete: if isAdmin();
+    }
+    
+    // ==========================================
+    // Messages Collection
+    // ==========================================
+    match /messages/{messageId} {
+      allow read: if isSignedIn() && ((resource.data.userId == request.auth.uid) || isStaff()) && isValidQuery();
+      allow create: if isSignedIn() && (request.resource.data.userId == request.auth.uid || isStaff());
+      allow update: if isStaff();
+      allow delete: if isAdmin();
+    }
+    
+    // ==========================================
+    // Notifications Collection
+    // ==========================================
+    match /notifications/{notifId} {
+      allow read: if isSignedIn() && ((resource.data.userId == request.auth.uid) || isStaff()) && isValidQuery();
+      allow create: if isStaff();
+      allow update: if isSignedIn() && (resource.data.userId == request.auth.uid || isStaff());
+      allow delete: if isAdmin();
+    }
+    
+    // ==========================================
+    // Email triggers
+    // ==========================================
+    match /mail/{mailId} {
+      allow create: if isSignedIn();
+      allow read, write: if isAdmin();
+    }
+    
+    // ==========================================
+    // Support Tickets
+    // ==========================================
+    match /support_tickets/{ticketId} {
+      allow create: if true;
+      allow read, write: if isStaff();
+    }
+    
+    // ==========================================
+    // Visitor Consents
+    // ==========================================
+    match /visitor_consents/{id} {
+      allow create: if true;
+      allow read, write: if isAdmin();
+    }
+
+    // ==========================================
+    // ===== جداول الإثباتات القانونية (Legal Evidence) =====
+    // ==========================================
+
+    match /legal_versions/{versionId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+    
+    match /legal_contracts/{contractId} {
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin()) && (isAdmin() || (
+        request.resource.data.customerSnapshot == resource.data.customerSnapshot &&
+        request.resource.data.shippingSnapshot == resource.data.shippingSnapshot &&
+        request.resource.data.orderSnapshot == resource.data.orderSnapshot &&
+        request.resource.data.contractVersion == resource.data.contractVersion &&
+        request.resource.data.contractGeneratedAt == resource.data.contractGeneratedAt
+      ));
+    }
+
+    match /legal_consents/{consentId} {
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && request.resource.data.userId == request.auth.uid && (
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.consentType == resource.data.consentType
+      );
+      allow delete: if false; // أمنياً: لا يمسح أبداً بعد إنشائه
+    }
+
+    match /order_evidence/{evidenceId} {
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin()) && (isAdmin() || (
+        request.resource.data.orderDetailsSnapshot == resource.data.orderDetailsSnapshot &&
+        request.resource.data.orderId == resource.data.orderId &&
+        request.resource.data.contractId == resource.data.contractId
+      ));
+      allow delete: if false;
+    }
+
+    match /audit_logs/{logId} {
+      allow read: if isSignedIn() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+    
+    // ==========================================
+    // Knowledge Articles Collection
+    // ==========================================
+    match /knowledge_articles/{articleId} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+    
+    // ==========================================
+    // Newsletter Subscribers Collection
+    // ==========================================
+    match /newsletter_subscribers/{subscriberId} {
+      allow create: if true;
+      allow read, update, delete: if isStaff();
+    }
+    
+    // ==========================================
+    // Legal Documents Collection
+    // ==========================================
+    match /legal_documents/{docId} {
+      allow read: if true;
+      allow write: if isStaff();
+      
+      match /versions/{versionId} {
+        allow read: if true;
+        allow write: if isStaff();
+      }
+    }
+    
+    // ==========================================
+    // Chatbot FAQs
+    // ==========================================
+    match /chatbot_faqs/{faqId} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+    
+    // ==========================================
+    // System and Audit Logs
+    // ==========================================
+    match /session_audit_logs/{logId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+    match /legal_audit_logs/{logId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+    match /crash_logs/{logId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

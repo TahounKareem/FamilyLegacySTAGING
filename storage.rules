@@ -1,0 +1,39 @@
+rules_version = '2';
+
+// Craft rules based on data in your Firestore database
+// allow write: if firestore.get(
+//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isValidImage() { return true; }
+    
+    function isValidDocument() { return true; }
+
+    match /users/{userId}/{allPaths=**} {
+      allow read: if isSignedIn() && isOwner(userId);
+      allow write: if isSignedIn() && isOwner(userId) && (isValidImage() || isValidDocument());
+    }
+    
+    match /orders/{orderId}/{allPaths=**} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn() && (isValidImage() || isValidDocument());
+    }
+    
+    // Admin access
+    match /{allPaths=**} {
+      allow read, write: if isSignedIn() && (
+        request.auth.token.email.lower() == 'kareem.tahoun@adamresearchcenter.net'
+      );
+    }
+  }
+}
