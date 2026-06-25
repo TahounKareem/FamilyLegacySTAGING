@@ -18,22 +18,25 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
     initialNodes.length 
       ? initialNodes.map(n => ({
           id: n.id,
-          firstName: n.name.split(' ')[0] || '',
-          lastName: n.name.split(' ').slice(1).join(' ') || '',
-          gender: 'unknown',
-          x: n.x,
-          y: n.y,
+          firstName: n.firstName || (n.name ? n.name.split(' ')[0] : 'بدون اسم') || 'بدون اسم',
+          lastName: n.lastName || (n.name ? n.name.split(' ').slice(1).join(' ') : '') || '',
+          gender: n.gender || 'unknown',
+          birthDate: n.birthDate,
+          deathDate: n.deathDate,
+          photoUrl: n.photoUrl,
+          x: n.x || 1500,
+          y: n.y || 1500,
         }))
-      : [{ id: "root", firstName: familyName || "العائلة", lastName: "", gender: "unknown", x: 1500, y: 1000 }]
+      : [{ id: "root", firstName: familyName || "العائلة", lastName: "", gender: "unknown", x: 1500, y: 1500 }]
   );
 
   const [relations, setRelations] = useState<FamilyRelation[]>(
     initialEdges.length 
       ? initialEdges.map(e => ({
           id: e.id,
-          sourceId: e.source,
-          targetId: e.target,
-          type: 'child'
+          sourceId: e.sourceId || e.source,
+          targetId: e.targetId || e.target,
+          type: e.type || 'child'
         }))
       : []
   );
@@ -145,10 +148,9 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
       
       <TransformWrapper
         initialScale={1}
-        minScale={0.2}
+        minScale={0.1}
         maxScale={4}
-        initialPositionX={-1000}
-        initialPositionY={-800}
+        centerOnInit={true}
         panning={{ disabled: draggingId !== null }}
         onPanningStart={() => isPanning.current = true}
         onPanningStop={() => {
@@ -170,12 +172,12 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
             </div>
 
             <div 
-              className="flex-1 w-full h-full cursor-grab active:cursor-grabbing"
+              className="absolute inset-0 cursor-grab active:cursor-grabbing"
               onPointerMove={handlePointerMoveContainer}
               onPointerUp={handlePointerUpContainer}
               onPointerLeave={handlePointerUpContainer}
             >
-              <TransformComponent wrapperClass="w-full h-full" contentClass="w-[3000px] h-[3000px] relative">
+              <TransformComponent wrapperStyle={{ width: '100%', height: '100%' }} contentStyle={{ width: '3000px', height: '3000px', position: 'relative' }}>
                 {/* Connections (Edges) */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none">
                   {relations.map(rel => {
