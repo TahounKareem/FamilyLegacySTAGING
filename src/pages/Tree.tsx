@@ -1,23 +1,35 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
 import { AdvancedTreeBuilder } from "../components/tree/AdvancedTreeBuilder";
-import { TimelineModal } from "../components/tree/TimelineModal";
-import { Save, RefreshCw, Loader2, Download, Upload, Clock } from "lucide-react";
+import { Save, Loader2, Download, Upload, Clock, Trees, MoreVertical, Map, PieChart, Book, Image as ImageIcon, BookOpen, HeartPulse } from "lucide-react";
 import { useAppStore } from "../lib/store";
 import { db } from "../lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import * as htmlToImage from 'html-to-image';
 
 export function Tree() {
+  const navigate = useNavigate();
   const currentUser = useAppStore(state => state.currentUser);
   const [nodes, setNodes] = useState<any[]>([]);
   const [edges, setEdges] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [showTimeline, setShowTimeline] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   
   const treeContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const loadTree = async () => {
@@ -151,45 +163,8 @@ export function Tree() {
             <h1 className="text-3xl font-bold text-brand-900 font-serif mb-2">منشئ شجرة العائلة (النسخة المطورة)</h1>
             <p className="text-brand-700">هذه نسخة تجريبية لتطوير وتحسين واجهة بناء شجرة العائلة.</p>
           </div>
-          <div className="flex gap-2 flex-wrap">
-            <button 
-              onClick={() => setShowTimeline(true)}
-              disabled={nodes.length === 0}
-              className="flex items-center gap-2 px-3 py-2 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-colors shadow-sm disabled:opacity-50 text-sm font-medium"
-            >
-              <Clock className="w-4 h-4" />
-              الخط الزمني
-            </button>
-            <div className="h-8 border-r border-brand-200 mx-1 self-center hidden sm:block"></div>
-            
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-3 py-2 border border-brand-300 text-brand-700 bg-white rounded-lg hover:bg-brand-50 transition-colors text-sm font-medium"
-            >
-              <Upload className="w-4 h-4" />
-              استيراد GEDCOM
-            </button>
+          <div className="flex gap-2 flex-wrap items-center relative" ref={menuRef}>
             <input type="file" accept=".ged" className="hidden" ref={fileInputRef} onChange={handleImportGedcom} />
-            
-            <button 
-              onClick={generateGedcom}
-              disabled={nodes.length === 0}
-              className="flex items-center gap-2 px-3 py-2 border border-brand-300 text-brand-700 bg-white rounded-lg hover:bg-brand-50 transition-colors disabled:opacity-50 text-sm font-medium"
-            >
-              <Download className="w-4 h-4" />
-              تصدير GEDCOM
-            </button>
-            
-            <div className="h-8 border-r border-brand-200 mx-1 self-center hidden sm:block"></div>
-
-            <button 
-              onClick={handleExportImage}
-              disabled={isExporting || nodes.length === 0}
-              className="flex items-center gap-2 px-3 py-2 border border-brand-300 text-brand-700 bg-white rounded-lg hover:bg-brand-50 transition-colors disabled:opacity-50 text-sm font-medium"
-            >
-              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-              تصدير صورة
-            </button>
             <button 
               onClick={handleSave}
               disabled={isSaving}
@@ -198,6 +173,56 @@ export function Tree() {
               {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
               حفظ الشجرة
             </button>
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="flex items-center justify-center gap-1 px-5 py-3 text-white transition-all shadow-sm font-medium border-2 border-emerald-500/30 bg-gradient-to-br from-[#bef264] to-[#16a34a] hover:from-[#a3e635] hover:to-[#15803d]"
+              style={{ 
+                borderRadius: '0 24px 0 24px', 
+                boxShadow: 'inset 2px 2px 6px rgba(255,255,255,0.4), inset -2px -2px 6px rgba(0,0,0,0.2), 0 4px 10px rgba(0,0,0,0.15)' 
+              }}
+              title="ميزات إضافية"
+            >
+              <Trees className="w-7 h-7 drop-shadow-md text-emerald-900" />
+              <MoreVertical className="w-5 h-5 drop-shadow-md text-emerald-900" />
+            </button>
+            
+            {showMenu && (
+              <div className="absolute top-full mt-2 left-0 w-64 bg-white rounded-xl shadow-xl border border-brand-100 py-2 z-50 overflow-hidden flex flex-col">
+                <button onClick={() => { handleExportImage(); setShowMenu(false); }} disabled={isExporting || nodes.length === 0} className="w-full text-right px-4 py-2 hover:bg-brand-50 text-sm flex items-center gap-2 text-brand-700">
+                  <ImageIcon className="w-4 h-4" /> تصدير صورة
+                </button>
+                <button onClick={() => { fileInputRef.current?.click(); setShowMenu(false); }} className="w-full text-right px-4 py-2 hover:bg-brand-50 text-sm flex items-center gap-2 text-brand-700">
+                  <Upload className="w-4 h-4" /> إستيراد GEDCOM
+                </button>
+                <button onClick={() => { generateGedcom(); setShowMenu(false); }} disabled={nodes.length === 0} className="w-full text-right px-4 py-2 hover:bg-brand-50 text-sm flex items-center gap-2 text-brand-700">
+                  <Download className="w-4 h-4" /> تصدير GEDCOM
+                </button>
+                
+                <div className="h-px bg-brand-100 my-1"></div>
+                
+                <button onClick={() => { setShowMenu(false); navigate('/TreeFeatures?tab=timeline'); }} className="w-full text-right px-4 py-2 hover:bg-brand-50 text-sm flex items-center gap-2 text-brand-700">
+                  <Clock className="w-4 h-4" /> الخط الزمني
+                </button>
+                <button onClick={() => { setShowMenu(false); navigate('/TreeFeatures?tab=map'); }} className="w-full text-right px-4 py-2 hover:bg-brand-50 text-sm flex items-center gap-2 text-brand-700">
+                  <Map className="w-4 h-4" /> الخريطة التفاعلية ومسارات الهجرة
+                </button>
+                <button onClick={() => { setShowMenu(false); navigate('/TreeFeatures?tab=analytics'); }} className="w-full text-right px-4 py-2 hover:bg-brand-50 text-sm flex items-center gap-2 text-brand-700">
+                  <PieChart className="w-4 h-4" /> لوحة التحليلات والإحصائيات
+                </button>
+                <button onClick={() => { setShowMenu(false); navigate('/TreeFeatures?tab=book'); }} className="w-full text-right px-4 py-2 hover:bg-brand-50 text-sm flex items-center gap-2 text-brand-700">
+                  <Book className="w-4 h-4" /> إنشاء "كتاب العائلة" للطباعة
+                </button>
+                <button onClick={() => { setShowMenu(false); navigate('/TreeFeatures?tab=media'); }} className="w-full text-right px-4 py-2 hover:bg-brand-50 text-sm flex items-center gap-2 text-brand-700">
+                  <ImageIcon className="w-4 h-4" /> معرض الوسائط المجمع
+                </button>
+                <button onClick={() => { setShowMenu(false); navigate('/TreeFeatures?tab=story'); }} className="w-full text-right px-4 py-2 hover:bg-brand-50 text-sm flex items-center gap-2 text-brand-700">
+                  <BookOpen className="w-4 h-4" /> قصة قصيرة أو سيرة ذاتية أدبية
+                </button>
+                <button onClick={() => { setShowMenu(false); navigate('/TreeFeatures?tab=medical'); }} className="w-full text-right px-4 py-2 hover:bg-brand-50 text-sm flex items-center gap-2 text-brand-700">
+                  <HeartPulse className="w-4 h-4" /> التاريخ الطبي والوراثي
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -212,10 +237,6 @@ export function Tree() {
           />
         </div>
       </div>
-
-      {showTimeline && (
-        <TimelineModal members={nodes} onClose={() => setShowTimeline(false)} />
-      )}
     </div>
   );
 }
