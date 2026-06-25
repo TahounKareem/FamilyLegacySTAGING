@@ -28,6 +28,7 @@ const ServiceAgreement = React.lazy(() => import("./pages/ServiceAgreement").the
 const ESignature = React.lazy(() => import("./pages/ESignature").then(m => ({ default: m.ESignature })));
 const ESignatureSuccess = React.lazy(() => import("./pages/ESignatureSuccess").then(m => ({ default: m.ESignatureSuccess })));
 const MockSignature = React.lazy(() => import("./pages/MockSignature").then(m => ({ default: m.MockSignature })));
+const Tree = React.lazy(() => import("./pages/Tree").then(m => ({ default: m.Tree })));
 
 // Loading Component
 const PageLoading = () => (
@@ -81,6 +82,7 @@ export default function App() {
           <Route path="/e-signature-success" element={<ESignatureSuccess />} />
           <Route path="/mock-signature" element={<MockSignature />} />
           <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/tree" element={<Tree />} />
         </Routes>
       </Suspense>
       <CookieBanner />

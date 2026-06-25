@@ -38,7 +38,7 @@ export function CookieBanner() {
       
       const ip = await getIp();
 
-      await addDoc(collection(db, 'legal_audit_logs'), {
+      await addDoc(collection(db, 'visitor_consents'), {
         visitorId,
         documentVersion: '1.0',
         action: 'cookie_consent_accepted',
