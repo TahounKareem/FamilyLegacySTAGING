@@ -24,7 +24,7 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
           x: n.x,
           y: n.y,
         }))
-      : [{ id: "root", firstName: familyName || "العائلة", lastName: "", gender: "unknown", x: 1000, y: 1000 }]
+      : [{ id: "root", firstName: familyName || "العائلة", lastName: "", gender: "unknown", x: 1500, y: 1000 }]
   );
 
   const [relations, setRelations] = useState<FamilyRelation[]>(
@@ -44,8 +44,8 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
     }
   }, [familyName, initialNodes.length]);
 
-  const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
-  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
+  const [editingMemberId, setEditingMemberId] = useState<string | null>("root");
+  const [selectedMemberId, setSelectedMemberId] = useState<string | null>("root");
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
   // Use a ref to track if we're panning to prevent accidental node selection on drag end
@@ -147,7 +147,8 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
         initialScale={1}
         minScale={0.2}
         maxScale={4}
-        centerOnInit={true}
+        initialPositionX={-1000}
+        initialPositionY={-800}
         panning={{ disabled: draggingId !== null }}
         onPanningStart={() => isPanning.current = true}
         onPanningStop={() => {
@@ -169,12 +170,12 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
             </div>
 
             <div 
-              className="w-full h-full cursor-grab active:cursor-grabbing"
+              className="flex-1 w-full h-full cursor-grab active:cursor-grabbing"
               onPointerMove={handlePointerMoveContainer}
               onPointerUp={handlePointerUpContainer}
               onPointerLeave={handlePointerUpContainer}
             >
-              <TransformComponent wrapperClass="w-full h-full" contentClass="w-[2000px] h-[2000px] relative">
+              <TransformComponent wrapperClass="w-full h-full" contentClass="w-[3000px] h-[3000px] relative">
                 {/* Connections (Edges) */}
                 <svg className="absolute inset-0 w-full h-full pointer-events-none">
                   {relations.map(rel => {
