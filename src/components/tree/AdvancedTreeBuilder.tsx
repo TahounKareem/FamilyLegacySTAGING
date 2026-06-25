@@ -24,7 +24,7 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
           x: n.x,
           y: n.y,
         }))
-      : [{ id: "root", firstName: familyName || "العائلة", lastName: "", gender: "unknown", x: 400, y: 100 }]
+      : [{ id: "root", firstName: familyName || "العائلة", lastName: "", gender: "unknown", x: 1000, y: 1000 }]
   );
 
   const [relations, setRelations] = useState<FamilyRelation[]>(
