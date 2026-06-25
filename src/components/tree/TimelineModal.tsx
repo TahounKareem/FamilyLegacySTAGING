@@ -26,43 +26,52 @@ export function TimelineModal({ members, onClose }: TimelineModalProps) {
     const fullName = `${m.firstName} ${m.lastName || ''}`.trim();
 
     if (m.birthDate) {
-      timelineItems.push({
-        id: `birth-${m.id}`,
-        date: new Date(m.birthDate),
-        dateStr: m.birthDate,
-        type: 'birth',
-        title: 'ميلاد',
-        memberId: m.id,
-        memberName: fullName,
-        details: m.birthPlace ? `في ${m.birthPlace}` : undefined
-      });
+      const parsedDate = new Date(m.birthDate);
+      if (!isNaN(parsedDate.getTime())) {
+        timelineItems.push({
+          id: `birth-${m.id}`,
+          date: parsedDate,
+          dateStr: m.birthDate,
+          type: 'birth',
+          title: 'ميلاد',
+          memberId: m.id,
+          memberName: fullName,
+          details: m.birthPlace ? `في ${m.birthPlace}` : undefined
+        });
+      }
     }
 
     if (m.deathDate) {
-      timelineItems.push({
-        id: `death-${m.id}`,
-        date: new Date(m.deathDate),
-        dateStr: m.deathDate,
-        type: 'death',
-        title: 'وفاة',
-        memberId: m.id,
-        memberName: fullName
-      });
+      const parsedDate = new Date(m.deathDate);
+      if (!isNaN(parsedDate.getTime())) {
+        timelineItems.push({
+          id: `death-${m.id}`,
+          date: parsedDate,
+          dateStr: m.deathDate,
+          type: 'death',
+          title: 'وفاة',
+          memberId: m.id,
+          memberName: fullName
+        });
+      }
     }
 
     if (m.events && m.events.length > 0) {
       m.events.forEach(ev => {
         if (ev.date) {
-          timelineItems.push({
-            id: `event-${m.id}-${ev.id}`,
-            date: new Date(ev.date),
-            dateStr: ev.date,
-            type: 'event',
-            title: ev.type,
-            memberId: m.id,
-            memberName: fullName,
-            details: ev.title
-          });
+          const parsedDate = new Date(ev.date);
+          if (!isNaN(parsedDate.getTime())) {
+            timelineItems.push({
+              id: `event-${m.id}-${ev.id}`,
+              date: parsedDate,
+              dateStr: ev.date,
+              type: 'event',
+              title: ev.type,
+              memberId: m.id,
+              memberName: fullName,
+              details: ev.title
+            });
+          }
         }
       });
     }
@@ -72,7 +81,7 @@ export function TimelineModal({ members, onClose }: TimelineModalProps) {
   timelineItems.sort((a, b) => a.date.getTime() - b.date.getTime());
 
   return (
-    <div className="fixed inset-0 bg-black/60 z-[200] flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 bg-black/60 z-[200] flex items-center justify-center p-4 sm:p-6" style={{ direction: 'rtl' }}>
       <div className="bg-white w-full max-w-4xl max-h-full rounded-2xl shadow-2xl flex flex-col overflow-hidden">
         <div className="flex items-center justify-between p-6 border-b border-brand-100 bg-brand-50">
           <h2 className="text-2xl font-bold text-brand-900 font-serif flex items-center gap-3">

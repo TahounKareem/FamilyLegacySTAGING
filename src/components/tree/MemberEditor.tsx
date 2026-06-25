@@ -6,9 +6,10 @@ interface MemberEditorProps {
   member: FamilyMember | null;
   onSave: (member: FamilyMember) => void;
   onClose: () => void;
+  viewMode?: 'traditional' | 'organic';
 }
 
-export function MemberEditor({ member, onSave, onClose }: MemberEditorProps) {
+export function MemberEditor({ member, onSave, onClose, viewMode = 'traditional' }: MemberEditorProps) {
   const [formData, setFormData] = useState<FamilyMember | null>(null);
 
   useEffect(() => {
@@ -127,45 +128,49 @@ export function MemberEditor({ member, onSave, onClose }: MemberEditorProps) {
   };
 
   return (
-    <div className="fixed inset-y-0 left-0 w-full sm:w-[450px] bg-white shadow-2xl border-r border-brand-200 flex flex-col z-50 transform transition-transform duration-300">
-      <div className="flex items-center justify-between p-4 border-b border-brand-100 bg-brand-50">
-        <h2 className="text-lg font-bold text-brand-900 font-serif">بيانات الفرد</h2>
-        <button onClick={onClose} className="p-2 hover:bg-brand-200 rounded-full transition-colors">
-          <X className="w-5 h-5 text-brand-700" />
+    <div className={`fixed inset-y-0 left-0 w-full sm:w-[450px] bg-white shadow-2xl flex flex-col z-50 transform transition-transform duration-300
+                    ${viewMode === 'organic' ? 'border-r-4 border-r-[#8b5a2b]' : 'border-r border-brand-200'}`}>
+      <div className={`flex items-center justify-between p-4 border-b
+                      ${viewMode === 'organic' ? 'bg-[#f4f1ea] border-b-[#8b5a2b]' : 'bg-brand-50 border-brand-100'}`}>
+        <h2 className={`text-lg font-bold font-serif ${viewMode === 'organic' ? 'text-[#5c4033]' : 'text-brand-900'}`}>بيانات الفرد</h2>
+        <button onClick={onClose} className={`p-2 rounded-full transition-colors ${viewMode === 'organic' ? 'hover:bg-[#e0d6c8] text-[#8b5a2b]' : 'hover:bg-brand-200 text-brand-700'}`}>
+          <X className="w-5 h-5" />
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {/* Avatar Upload */}
         <div className="flex flex-col items-center justify-center">
-          <div className="w-24 h-24 rounded-full bg-brand-100 border-2 border-brand-200 flex items-center justify-center relative overflow-hidden group cursor-pointer">
+          <div className={`w-24 h-24 rounded-full flex items-center justify-center relative overflow-hidden group cursor-pointer border-2
+                          ${viewMode === 'organic' ? 'bg-emerald-50 border-emerald-300' : 'bg-brand-100 border-brand-200'}`}>
             {formData.photoUrl ? (
               <img src={formData.photoUrl} alt="Profile" className="w-full h-full object-cover" />
             ) : (
-              <User className="w-10 h-10 text-brand-400" />
+              <User className={`w-10 h-10 ${viewMode === 'organic' ? 'text-emerald-500' : 'text-brand-400'}`} />
             )}
             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <Camera className="w-6 h-6 text-white" />
             </div>
           </div>
-          <span className="text-xs text-brand-500 mt-2">انقر لتغيير الصورة</span>
+          <span className={`text-xs mt-2 ${viewMode === 'organic' ? 'text-emerald-700' : 'text-brand-500'}`}>انقر لتغيير الصورة</span>
         </div>
 
         {/* Basic Info */}
-        <div className="bg-white border border-brand-100 rounded-xl p-4 shadow-sm space-y-4">
-          <h3 className="text-sm font-bold text-brand-800 flex items-center gap-2 border-b border-brand-50 pb-2">
-            <User className="w-4 h-4 text-brand-500" />
+        <div className={`bg-white border rounded-xl p-4 shadow-sm space-y-4 ${viewMode === 'organic' ? 'border-emerald-200' : 'border-brand-100'}`}>
+          <h3 className={`text-sm font-bold flex items-center gap-2 border-b pb-2
+                         ${viewMode === 'organic' ? 'text-emerald-800 border-emerald-100' : 'text-brand-800 border-brand-50'}`}>
+            <User className={`w-4 h-4 ${viewMode === 'organic' ? 'text-emerald-600' : 'text-brand-500'}`} />
             المعلومات الأساسية
           </h3>
           
           <div>
-            <label className="block text-xs font-medium text-brand-700 mb-1">الاسم الأول <span className="text-red-500">*</span></label>
+            <label className={`block text-xs font-medium mb-1 ${viewMode === 'organic' ? 'text-emerald-800' : 'text-brand-700'}`}>الاسم الأول <span className="text-red-500">*</span></label>
             <input
               type="text"
               name="firstName"
               value={formData.firstName}
               onChange={handleChange}
-              className="w-full border border-brand-200 rounded-lg px-3 py-2 text-sm focus:ring-brand-500 focus:border-brand-500"
+              className={`w-full border rounded-lg px-3 py-2 text-sm ${viewMode === 'organic' ? 'border-emerald-200 focus:ring-emerald-500 focus:border-emerald-500' : 'border-brand-200 focus:ring-brand-500 focus:border-brand-500'}`}
               placeholder="الاسم الأول"
               required
             />
@@ -228,9 +233,9 @@ export function MemberEditor({ member, onSave, onClose }: MemberEditorProps) {
         </div>
 
         {/* Demographics */}
-        <div className="bg-white border border-brand-100 rounded-xl p-4 shadow-sm space-y-4">
-          <h3 className="text-sm font-bold text-brand-800 flex items-center gap-2 border-b border-brand-50 pb-2">
-            <Tag className="w-4 h-4 text-brand-500" />
+        <div className={`bg-white border rounded-xl p-4 shadow-sm space-y-4 ${viewMode === 'organic' ? 'border-emerald-200' : 'border-brand-100'}`}>
+          <h3 className={`text-sm font-bold flex items-center gap-2 border-b pb-2 ${viewMode === 'organic' ? 'text-emerald-800 border-emerald-100' : 'text-brand-800 border-brand-50'}`}>
+            <Tag className={`w-4 h-4 ${viewMode === 'organic' ? 'text-emerald-600' : 'text-brand-500'}`} />
             البيانات الشخصية
           </h3>
           
@@ -290,9 +295,9 @@ export function MemberEditor({ member, onSave, onClose }: MemberEditorProps) {
         </div>
 
         {/* Dates */}
-        <div className="bg-white border border-brand-100 rounded-xl p-4 shadow-sm space-y-4">
-          <h3 className="text-sm font-bold text-brand-800 flex items-center gap-2 border-b border-brand-50 pb-2">
-            <Calendar className="w-4 h-4 text-brand-500" />
+        <div className={`bg-white border rounded-xl p-4 shadow-sm space-y-4 ${viewMode === 'organic' ? 'border-emerald-200' : 'border-brand-100'}`}>
+          <h3 className={`text-sm font-bold flex items-center gap-2 border-b pb-2 ${viewMode === 'organic' ? 'text-emerald-800 border-emerald-100' : 'text-brand-800 border-brand-50'}`}>
+            <Calendar className={`w-4 h-4 ${viewMode === 'organic' ? 'text-emerald-600' : 'text-brand-500'}`} />
             التواريخ
           </h3>
           <div className="grid grid-cols-2 gap-4">
@@ -308,10 +313,10 @@ export function MemberEditor({ member, onSave, onClose }: MemberEditorProps) {
         </div>
 
         {/* Important Events */}
-        <div className="bg-white border border-brand-100 rounded-xl p-4 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-brand-50 pb-2">
-            <h3 className="text-sm font-bold text-brand-800 flex items-center gap-2">
-              <CheckSquare className="w-4 h-4 text-brand-500" />
+        <div className={`bg-white border rounded-xl p-4 shadow-sm space-y-4 ${viewMode === 'organic' ? 'border-emerald-200' : 'border-brand-100'}`}>
+          <div className={`flex items-center justify-between border-b pb-2 ${viewMode === 'organic' ? 'border-emerald-100' : 'border-brand-50'}`}>
+            <h3 className={`text-sm font-bold flex items-center gap-2 ${viewMode === 'organic' ? 'text-emerald-800' : 'text-brand-800'}`}>
+              <CheckSquare className={`w-4 h-4 ${viewMode === 'organic' ? 'text-emerald-600' : 'text-brand-500'}`} />
               أحداث هامة
             </h3>
             <button onClick={addEvent} className="text-xs bg-brand-50 text-brand-700 px-2 py-1 rounded hover:bg-brand-100 transition-colors flex items-center">
@@ -354,9 +359,9 @@ export function MemberEditor({ member, onSave, onClose }: MemberEditorProps) {
         </div>
 
         {/* Bio */}
-        <div className="bg-white border border-brand-100 rounded-xl p-4 shadow-sm space-y-4">
-          <h3 className="text-sm font-bold text-brand-800 flex items-center gap-2 border-b border-brand-50 pb-2">
-            <FileText className="w-4 h-4 text-brand-500" />
+        <div className={`bg-white border rounded-xl p-4 shadow-sm space-y-4 ${viewMode === 'organic' ? 'border-emerald-200' : 'border-brand-100'}`}>
+          <h3 className={`text-sm font-bold flex items-center gap-2 border-b pb-2 ${viewMode === 'organic' ? 'text-emerald-800 border-emerald-100' : 'text-brand-800 border-brand-50'}`}>
+            <FileText className={`w-4 h-4 ${viewMode === 'organic' ? 'text-emerald-600' : 'text-brand-500'}`} />
             نبذة تعريفية
           </h3>
           <textarea
@@ -370,10 +375,10 @@ export function MemberEditor({ member, onSave, onClose }: MemberEditorProps) {
         </div>
 
         {/* Media */}
-        <div className="bg-white border border-brand-100 rounded-xl p-4 shadow-sm space-y-4 mb-4">
-          <div className="flex items-center justify-between border-b border-brand-50 pb-2">
-            <h3 className="text-sm font-bold text-brand-800 flex items-center gap-2">
-              <ImageIcon className="w-4 h-4 text-brand-500" />
+        <div className={`bg-white border rounded-xl p-4 shadow-sm space-y-4 mb-4 ${viewMode === 'organic' ? 'border-emerald-200' : 'border-brand-100'}`}>
+          <div className={`flex items-center justify-between border-b pb-2 ${viewMode === 'organic' ? 'border-emerald-100' : 'border-brand-50'}`}>
+            <h3 className={`text-sm font-bold flex items-center gap-2 ${viewMode === 'organic' ? 'text-emerald-800' : 'text-brand-800'}`}>
+              <ImageIcon className={`w-4 h-4 ${viewMode === 'organic' ? 'text-emerald-600' : 'text-brand-500'}`} />
               الوسائط المرفقة
             </h3>
             <button onClick={addMedia} className="text-xs bg-brand-50 text-brand-700 px-2 py-1 rounded hover:bg-brand-100 transition-colors flex items-center">
@@ -419,16 +424,16 @@ export function MemberEditor({ member, onSave, onClose }: MemberEditorProps) {
         </div>
       </div>
 
-      <div className="p-4 border-t border-brand-100 bg-brand-50 flex gap-3 mt-auto">
+      <div className={`p-4 border-t flex gap-3 mt-auto ${viewMode === 'organic' ? 'bg-[#f4f1ea] border-t-[#8b5a2b]' : 'bg-brand-50 border-brand-100'}`}>
         <button
           onClick={handleSave}
-          className="flex-1 bg-brand-600 text-white py-2 rounded-lg hover:bg-brand-700 transition-colors font-medium text-sm"
+          className={`flex-1 text-white py-2 rounded-lg font-medium text-sm transition-colors ${viewMode === 'organic' ? 'bg-[#8b5a2b] hover:bg-[#6b4423]' : 'bg-brand-600 hover:bg-brand-700'}`}
         >
           حفظ التغييرات
         </button>
         <button
           onClick={onClose}
-          className="flex-1 bg-white text-brand-700 border border-brand-200 py-2 rounded-lg hover:bg-brand-50 transition-colors font-medium text-sm"
+          className={`flex-1 py-2 rounded-lg font-medium text-sm transition-colors border ${viewMode === 'organic' ? 'bg-white text-[#8b5a2b] border-[#8b5a2b] hover:bg-[#e0d6c8]' : 'bg-white text-brand-700 border-brand-200 hover:bg-brand-50'}`}
         >
           إلغاء
         </button>
