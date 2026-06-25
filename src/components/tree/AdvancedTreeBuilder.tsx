@@ -42,6 +42,46 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
   );
 
   useEffect(() => {
+    if (initialNodes && initialNodes.length > 0) {
+      setMembers(initialNodes.map(n => ({
+        id: n.id,
+        firstName: n.firstName || (n.name ? n.name.split(' ')[0] : 'بدون اسم') || 'بدون اسم',
+        lastName: n.lastName || '',
+        titles: n.titles || [],
+        nickname: n.nickname || '',
+        noDescendants: n.noDescendants || false,
+        femaleDominated: n.femaleDominated || false,
+        isFamous: n.isFamous || false,
+        gender: n.gender || 'unknown',
+        religion: n.religion || '',
+        ethnicity: n.ethnicity || '',
+        languages: n.languages || [],
+        profession: n.profession || '',
+        birthPlace: n.birthPlace || '',
+        birthDate: n.birthDate,
+        deathDate: n.deathDate,
+        events: n.events || [],
+        bio: n.bio || '',
+        media: n.media || [],
+        photoUrl: n.photoUrl,
+        x: n.x || 1500,
+        y: n.y || 1500,
+      })));
+    }
+  }, [initialNodes]);
+
+  useEffect(() => {
+    if (initialEdges && initialEdges.length > 0) {
+      setRelations(initialEdges.map(e => ({
+        id: e.id,
+        sourceId: e.sourceId || e.source,
+        targetId: e.targetId || e.target,
+        type: e.type || 'child'
+      })));
+    }
+  }, [initialEdges]);
+
+  useEffect(() => {
     if (!initialNodes.length && familyName) {
       setMembers(prev => prev.map(m => m.id === "root" ? { ...m, firstName: familyName } : m));
     }
@@ -227,7 +267,7 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
                   return (
                     <div
                       key={member.id}
-                      className="absolute transform -translate-x-1/2 -translate-y-1/2 select-none"
+                      className={`absolute transform -translate-x-1/2 -translate-y-1/2 select-none ${isSelected ? 'z-[60]' : 'z-10'}`}
                       style={{ left: member.x, top: member.y, direction: 'rtl' }}
                     >
                       <div
@@ -250,12 +290,23 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
                             <User className="w-6 h-6" />
                           )}
                         </div>
-                        <div className="text-center w-full">
-                          <div className="text-sm font-bold text-brand-900 truncate" title={`${member.firstName} ${member.lastName}`}>
-                            {member.firstName} {member.lastName}
+                        <div className="text-center w-full mt-1">
+                          <div className="flex flex-wrap items-center justify-center gap-1 leading-tight">
+                            <span className="text-sm font-bold text-brand-900">{member.firstName} {member.lastName}</span>
+                            {member.titles && member.titles.length > 0 && (
+                              <span className="text-xs text-brand-600 font-medium">({member.titles.join('، ')})</span>
+                            )}
+                            {member.nickname && (
+                              <span className="text-xs text-accent font-medium">{`{${member.nickname}}`}</span>
+                            )}
+                          </div>
+                          <div className="flex flex-wrap justify-center gap-1 mt-1.5">
+                            {member.noDescendants && <span className="text-[9px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded-full border border-gray-200">لم يعقب</span>}
+                            {member.femaleDominated && <span className="text-[9px] bg-pink-50 text-pink-600 px-1.5 py-0.5 rounded-full border border-pink-200">ميناث</span>}
+                            {member.isFamous && <span className="text-[9px] bg-yellow-50 text-yellow-700 px-1.5 py-0.5 rounded-full border border-yellow-200">مشهور</span>}
                           </div>
                           {member.birthDate && (
-                            <div className="text-[10px] text-brand-500 mt-1 flex items-center justify-center gap-1">
+                            <div className="text-[10px] text-brand-500 mt-1 flex items-center justify-center gap-1 font-mono">
                               <span>{new Date(member.birthDate).getFullYear()}</span>
                               {member.deathDate && <span> - {new Date(member.deathDate).getFullYear()}</span>}
                             </div>
@@ -309,7 +360,7 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
 
       {/* Editor Side Panel */}
       {editingMember && (
-        <div className="absolute inset-y-0 right-0 z-40" style={{ direction: 'rtl' }}>
+        <div className="absolute inset-y-0 right-0 z-[100]" style={{ direction: 'rtl' }}>
            <MemberEditor 
              member={editingMember} 
              onSave={handleSaveMember} 
