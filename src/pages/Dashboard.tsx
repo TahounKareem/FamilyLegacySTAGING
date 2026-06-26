@@ -55,6 +55,8 @@ import {
 import { TreeBuilder } from "./TreeBuilder";
 import { TimelineBuilder } from "./TimelineBuilder";
 
+import { MinimalFooter } from "../components/layout/MinimalFooter";
+
 export function Dashboard() {
   const { currentUser, orders, updateOrderStatus, addMessageToOrder } =
     useAppStore();
@@ -3255,24 +3257,12 @@ export function Dashboard() {
           </div>
         </div>
       )}
-      {/* Footer */}
-      <footer className="mt-20 border-t border-brand-200 bg-brand-50 pt-12 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-brand-700">
-          <p className="font-serif text-xl sm:text-2xl text-brand-900 mb-6 font-bold">
-            ما لا يُوثق اليوم… قد يصبح مجرد رواية غامضة غدًا.
-          </p>
-          <div className="space-y-2 text-sm sm:text-base">
-            <p className="font-bold text-brand-900">GeneaLab LLC</p>
-            <p>تعمل المنصة من خلال شركة جينيا لاب - الولايات المتحدة الأمريكية.</p>
-          </div>
-          <div className="mt-8 pt-8 border-t border-brand-200 text-sm flex flex-col items-center gap-4">
-            <p className="opacity-75">© 2026 GeneaLab LLC — جميع الحقوق محفوظة.</p>
-            <Link to="/" className="inline-flex items-center gap-2 text-brand-600 hover:text-brand-800 font-bold transition p-2 bg-brand-100 rounded-lg shadow-sm">
-              <Home className="w-4 h-4" /> الذهاب الى الصفحة الرئيسية لمنصة سجل تراث العائلة
-            </Link>
-          </div>
-        </div>
-      </footer>
+      <div className="flex justify-center mt-12 mb-8 px-4">
+        <Link to="/" className="inline-flex items-center gap-2 text-brand-600 hover:text-brand-800 font-bold transition p-4 bg-white border border-brand-200 rounded-xl shadow-sm hover:shadow-md">
+          <Home className="w-5 h-5" /> الذهاب الى الصفحة الرئيسية لمنصة سجل تراث العائلة
+        </Link>
+      </div>
+      <MinimalFooter />
 
       {confirmState.isOpen && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">

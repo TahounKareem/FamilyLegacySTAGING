@@ -196,7 +196,7 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
       )}
       
       <TransformWrapper
-        initialScale={1}
+        initialScale={0.48}
         minScale={0.1}
         maxScale={4}
         centerOnInit={true}
@@ -208,7 +208,7 @@ export function AdvancedTreeBuilder({ initialNodes = [], initialEdges = [], onCh
       >
         {({ zoomIn, zoomOut, resetTransform, centerView }) => (
           <>
-            <div className="absolute top-4 left-4 z-10 flex flex-col gap-2 bg-white p-2 rounded-xl shadow-md border border-brand-100">
+            <div className="absolute top-4 right-4 z-10 flex flex-col gap-2 bg-white p-2 rounded-xl shadow-md border border-brand-100">
               <button onClick={() => setViewMode(prev => prev === 'organic' ? 'traditional' : 'organic')} className="p-2 hover:bg-brand-50 rounded-lg text-brand-700 transition-colors" title="تغيير طريقة العرض">
                 {viewMode === 'organic' ? <LayoutGrid className="w-5 h-5 text-emerald-700" /> : <Leaf className="w-5 h-5 text-emerald-600" />}
               </button>
